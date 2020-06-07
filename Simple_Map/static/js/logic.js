@@ -20,6 +20,6 @@ attribution: 'Map data © <a href="https://www.openstreetmap.org/">OpenStreetMap
 });
 
 // Then we add our 'graymap' tile layer to the map.
-streets.addTo(map);
+//streets.addTo(map);
 
 // This is a NEW comment. This is different
