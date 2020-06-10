@@ -1,5 +1,5 @@
 // Add console.log to check to see if our code is working.
-console.log("working");
+console.log("Challenge Completed!");
 
 // We create the tile layer that will be the background of our map.
 //Replaced with dark map
@@ -16,10 +16,18 @@ let satelliteStreets = L.tileLayer('https://api.mapbox.com/styles/v1/mapbox/sate
   accessToken: API_KEY
 });
 
+// We create the dark view tile layer that will be an option for our map.
+let light = L.tileLayer('https://api.mapbox.com/styles/v1/mapbox/bright-v9/tiles/{z}/{x}/{y}?access_token={accessToken}', {
+  attribution: 'Map data © <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors, <a href="https://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery (c) <a href="https://www.mapbox.com/">Mapbox</a>',
+  maxZoom: 18,
+  accessToken: API_KEY
+});
+
 // Create a base layer that holds both maps.
 let baseMaps = {
   "Streets": streets,
-  "Satellite": satelliteStreets
+  "Satellite": satelliteStreets,
+  "Light": light
 };
 
 // Create the earthquake layer for our map.
@@ -35,11 +43,6 @@ let overlays = {
     // newlayer name: newLayer
 };
 
-// Then we add a control to the map that will allow the user to change
-// which layers are visible.
-//L.control.layers(baseMaps, overlays).addTo(map);
-
-
 // Create the map object with center, zoom level and default layer.
 let map = L.map('mapid', {
 	center: [39.5, -98.5],
@@ -49,16 +52,6 @@ let map = L.map('mapid', {
 
 // Pass our map layers into our layers control and add the layers control to the map.
 L.control.layers(baseMaps, overlays).addTo(map);
-
-// Then we add our 'graymap' tile layer to the map.
-//streets.addTo(map);
-
-// Accessing the airport GeoJSON URL
-//let airportData = "https://raw.githubusercontent.com/GodIsLove4U/Mapping_Earthquakes/master/majorAirports.json";
-
-// Accessing the Toronto neighborhoods GeoJSON URL.
-//let torontoHoods = "https://raw.githubusercontent.com/GodIsLove4U/Mapping_Earthquakes/master/torontoNeighborhoods.json";
-
 
 // Create a style for the lines.
 let myStyle = {
@@ -118,7 +111,7 @@ function getRadius(magnitude) {
 L.geoJson(data, {
     // We turn each feature into a circleMarker on the map.
     pointToLayer: function(feature, latlng) {
-        console.log(data);
+        //console.log(data);
         return L.circleMarker(latlng);
       },
     // We set the style for each circleMarker using our styleInfo function.;
@@ -131,14 +124,52 @@ L.geoJson(data, {
 
     // Then we add the earthquake lay to our map. 
     earthquakes.addTo(map)
+
+//Custom Legend Control choropleth Info from: https://leafletjs.com/examples/choropleth/
+let legend = L.control({
+    position: 'bottomright'
 });
 
-d3.json("https://raw.githubusercontent.com/fraxen/tectonicplates/master/GeoJSON/PB2002_boundaries.json", 
-    function(tectonic_data){
-        L.geoJson(tectonic_data, {
-            color: "orange",
-            weight: 2
-        }).addTo(tectonicplates);
+// Then add all the details for the legend
+legend.onAdd = function() {
+    let div = L.DomUtil.create('div', 'info legend');
+      grades = [0, 10, 20, 50, 100, 200, 500, 1000],
+      labels = [];
+    
+    const magnitudes = [0, 1, 2, 3, 4, 5];
+    const colors = [
+      "#98ee00",
+      "#d4ee00",
+      "#eecc00",
+      "#ee9c00",
+      "#ea822c",
+      "#ea2c2c"
+    ];
+
+    // Looping through our intervals to generate a label with a colored square for each interval.
+    for (var i = 0; i < magnitudes.length; i++) {
+      //console.log(colors[i]);
+      div.innerHTML +=
+        "<i style='background: " + colors[i] + "'></i> " +
+        magnitudes[i] + (magnitudes[i + 1] ? "&ndash;" + magnitudes[i + 1] + "<br>" : "+");
+    }
+    return div;
+};
+
+legend.addTo(map);
+
+
+});
+
+// Adding tectonic plate ingo
+d3.json("https://raw.githubusercontent.com/fraxen/tectonicplates/master/GeoJSON/PB2002_boundaries.json").then(function(tectonic_data) {
+//function(tectonic_data){
+    console.log(tectonic_data);
+    L.geoJSON(tectonic_data, {
+        color: "orange",
+        weight: 2
+    }).addTo(tectonicplates);
 
     tectonicplates.addTo(map);
-});
+    
+})

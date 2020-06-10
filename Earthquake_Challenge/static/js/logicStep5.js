@@ -24,14 +24,12 @@ let baseMaps = {
 
 // Create the earthquake layer for our map.
 let earthquakes = new L.layerGroup();
-let tectonicplates = new L.layerGroup();
 // make another layer let newLayer = new L.layerGroup()
 
 // We define an object that contains the overlays.
 // This overlay will be visible all the time.
 let overlays = {
-    Earthquakes: earthquakes,
-    TectonicPlate: tectonicplates
+    Earthquakes: earthquakes
     // newlayer name: newLayer
 };
 
@@ -131,14 +129,53 @@ L.geoJson(data, {
 
     // Then we add the earthquake lay to our map. 
     earthquakes.addTo(map)
+
+//Custom Legend Control choropleth Info from: https://leafletjs.com/examples/choropleth/
+let legend = L.control({
+    position: 'bottomright'
 });
 
-d3.json("https://raw.githubusercontent.com/fraxen/tectonicplates/master/GeoJSON/PB2002_boundaries.json", 
-    function(tectonic_data){
-        L.geoJson(tectonic_data, {
-            color: "orange",
-            weight: 2
-        }).addTo(tectonicplates);
+// Then add all the details for the legend
+legend.onAdd = function() {
+    let div = L.DomUtil.create('div', 'info legend');
+      grades = [0, 10, 20, 50, 100, 200, 500, 1000],
+      labels = [];
+    
+    const magnitudes = [0, 1, 2, 3, 4, 5];
+    const colors = [
+      "#98ee00",
+      "#d4ee00",
+      "#eecc00",
+      "#ee9c00",
+      "#ea822c",
+      "#ea2c2c"
+    ];
 
-    tectonicplates.addTo(map);
+    // Looping through our intervals to generate a label with a colored square for each interval.
+    for (var i = 0; i < magnitudes.length; i++) {
+      console.log(colors[i]);
+      div.innerHTML +=
+        "<i style='background: " + colors[i] + "'></i> " +
+        magnitudes[i] + (magnitudes[i + 1] ? "&ndash;" + magnitudes[i + 1] + "<br>" : "+");
+    }
+    return div;
+};
+
+legend.addTo(map);
+
+
+        //grades = [0, 10, 20, 50, 100, 200, 500, 1000],
+        //labels = [];
+    
+    // loop through our density intervals and generate a label with a colored square for each interval
+    //for (var i = 0; i < grades.length; i++) {
+        //div.innerHTML +=
+            //'<i style="background:' + getColor(grades[i] + 1) + '"></i> ' +
+            //grades[i] + (grades[i + 1] ? '&ndash;' + grades[i + 1] + '<br>' : '+');
+    //}
+        //return div;
+    //};
+    
+    //legend.addTo(map);
+
 });
